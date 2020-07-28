@@ -1,0 +1,32 @@
+{
+
+	"name": "com.helvest.scriptablejson",
+
+	"version": "1.0.0",
+
+	"displayName": "Scriptable Json",
+
+	"description": "ScriptableObject that serves as a link to Json files",
+
+	"dependencies": 
+	{
+		"com.unity.modules.jsonserialize": "1.0.0"
+	},
+
+	"keywords": 
+	[
+		"ScriptableObjetc",
+
+		"Json",
+
+		"file"
+	],
+
+	"author": 
+	{
+		"name": "Pedro Dominicé (Helvest)",
+
+		"url": "https://twitter.com/HelvestEpic"
+	}
+
+}
