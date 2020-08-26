@@ -5,31 +5,19 @@ namespace ScriptableJsons
 {
 	public abstract class ScriptableJsonFromTextAsset<T> : ScriptableJsonGeneric<T> where T : class, new()
 	{
-		public TextAsset _textAsset;
+		[SerializeReference]
+		private TextAsset _textAsset = null;
 
-		[SerializeField]
-		protected T defaultData;
-
-		[NonSerialized]
-		protected T loadedData;
-
-		public override T GetData()
+		protected override void LoadData()
 		{
-			if (loadedData == null)
+			if (_textAsset)
 			{
-#if UNITY_EDITOR
-				loadedData = DeepCopy(defaultData);
-#else
-				loadedData = defaultData;
-#endif
-
-				if (_textAsset)
-				{
-					JsonUtility.FromJsonOverwrite(_textAsset.text, loadedData);
-				}
+				JsonUtility.FromJsonOverwrite(_textAsset.text, loadedData);
 			}
-
-			return loadedData;
+			else
+			{
+				Debug.LogError($"textAsset is null", this);
+			}
 		}
 	}
 }

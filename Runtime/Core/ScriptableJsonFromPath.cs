@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using UnityEngine;
 
 namespace ScriptableJsons
@@ -15,38 +14,21 @@ namespace ScriptableJsons
 		[SerializeField]
 		private string _fileName = string.Empty;
 
-		private const string Extension = ".json";
+		private const string _extension = ".json";
 
 		[SerializeField]
 		private bool _throwErrorIfNotFind = false;
 
-		[SerializeField]
-		protected T defaultData;
-
-		[NonSerialized]
-		protected T loadedData;
-
-		public override T GetData()
+		protected override void LoadData()
 		{
-			if (loadedData == null)
+			if (LoadText.TryLoadText(_pathSystem, Path.Combine(_path, _fileName), _extension, out string json))
 			{
-#if UNITY_EDITOR
-				loadedData = DeepCopy(defaultData);
-#else
-				loadedData = defaultData;
-#endif
-
-				if (LoadText.TryLoadText(_pathSystem, Path.Combine(_path, _fileName), Extension, out string json))
-				{
-					JsonUtility.FromJsonOverwrite(json, loadedData);
-				}
-				else if (_throwErrorIfNotFind)
-				{
-					Debug.LogError($"File: {_fileName} not found at path: {_path}", this);
-				}
+				JsonUtility.FromJsonOverwrite(json, loadedData);
 			}
-
-			return loadedData;
+			else if (_throwErrorIfNotFind)
+			{
+				Debug.LogError($"File: {_fileName} not found at path: {_path}", this);
+			}
 		}
 	}
 }

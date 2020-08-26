@@ -41,6 +41,8 @@ namespace ScriptableJsons
 				}
 			}
 
+			Debug.LogError("Path: " + path);
+
 			text = string.Empty;
 
 			return false;
