@@ -41,8 +41,6 @@ namespace ScriptableJsons
 				}
 			}
 
-			Debug.LogError("Path: " + path);
-
 			text = string.Empty;
 
 			return false;
@@ -65,6 +63,8 @@ namespace ScriptableJsons
 
 				return true;
 			}
+
+			Debug.LogWarning($"File not found at path: {path}");
 
 			text = string.Empty;
 
