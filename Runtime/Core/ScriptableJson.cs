@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace ScriptableJsons
+namespace ScriptableJson
 {
 	public abstract class ScriptableJson : ScriptableObject
 	{

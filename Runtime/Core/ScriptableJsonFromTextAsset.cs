@@ -1,7 +1,7 @@
 ﻿using System;
 using UnityEngine;
 
-namespace ScriptableJsons
+namespace ScriptableJson
 {
 	public abstract class ScriptableJsonFromTextAsset<T> : ScriptableJsonGeneric<T> where T : class, new()
 	{

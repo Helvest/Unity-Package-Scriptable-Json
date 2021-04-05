@@ -6,7 +6,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System;
 using UnityEngine;
 
-namespace ScriptableJsons
+namespace ScriptableJson
 {
 	public abstract class ScriptableJsonGeneric<T> : ScriptableJson where T : class, new()
 	{
