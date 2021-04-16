@@ -1,17 +1,11 @@
 ﻿using System.IO;
 using UnityEngine;
+using System;
 
 namespace ScriptableJson
 {
-	public static class LoadText
-	{
-		public enum PathSystem
-		{
-			DirectPath,
-			StreamingAssets,
-			Resources
-		}
-
+	public static class TextFile
+	{	
 		public static bool TryLoadText(PathSystem pathSystem, string path, string extension, out string text)
 		{
 			switch (pathSystem)
@@ -28,6 +22,21 @@ namespace ScriptableJson
 			}
 		}
 
+		public static bool TrySaveText(PathSystem pathSystem, string path, string extension, string text)
+		{
+			switch (pathSystem)
+			{
+				default:
+				case PathSystem.DirectPath:
+					return TrySaveTextToPatch(path + extension, text);
+
+				case PathSystem.StreamingAssets:
+					return TrySaveTextToStreamingAssets(path + extension, text);
+
+				case PathSystem.Resources:
+					return false;
+			}
+		}
 
 		public static bool TryLoadTextFromPatch(string path, out string text)
 		{
@@ -46,9 +55,29 @@ namespace ScriptableJson
 			return false;
 		}
 
+		public static bool TrySaveTextToPatch(string path, string text)
+		{
+			try
+			{
+				File.WriteAllText(path, text);
+			}
+			catch (Exception e)
+			{
+				Debug.LogError(e);
+				return false;
+			}
+
+			return true;
+		}
+
 		public static bool TryLoadTextFromStreamingAssets(string path, out string text)
 		{
 			return TryLoadTextFromPatch(Path.Combine(Application.streamingAssetsPath, path), out text);
+		}
+
+		public static bool TrySaveTextToStreamingAssets(string path, string text)
+		{
+			return TrySaveTextToPatch(Path.Combine(Application.streamingAssetsPath, path), text);
 		}
 
 		public static bool TryLoadTextFromRessource(string path, out string text)

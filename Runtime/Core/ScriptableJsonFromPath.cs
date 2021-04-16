@@ -5,8 +5,11 @@ namespace ScriptableJson
 {
 	public abstract class ScriptableJsonFromPath<T> : ScriptableJsonGeneric<T> where T : class, new()
 	{
+
+		#region Variables
+
 		[SerializeField]
-		private LoadText.PathSystem _pathSystem = LoadText.PathSystem.DirectPath;
+		private PathSystem _pathSystem = PathSystem.DirectPath;
 
 		[SerializeField]
 		private string _path = string.Empty;
@@ -20,32 +23,41 @@ namespace ScriptableJson
 		[SerializeField]
 		private string _fileName = string.Empty;
 
-		private const string _extension = ".json";
+		private const string EXTENSION = ".json";
+
+		[Tooltip("If true, format the json for readability. If false, format the json for minimum size.")]
+		[SerializeField]
+		protected bool prettyPrint = false;
 
 		[SerializeField]
 		private DebugLevel _throwDebugIfNotFind = DebugLevel.Warning;
 
-		private enum DebugLevel
-		{
-			None,
-			Normal,		
-			Warning,
-			Error
-		}
+		#endregion
 
-		protected override void LoadData()
+		#region GetPath
+
+		public string GetPath()
 		{
 #if UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX
-			var path = string.IsNullOrEmpty(_linuxOverridePath) ? _path : _linuxOverridePath;
+			return string.IsNullOrEmpty(_linuxOverridePath) ? _path : _linuxOverridePath;
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-			var path = string.IsNullOrEmpty(_OSXOverridePath) ? _path : _OSXOverridePath;
+			return string.IsNullOrEmpty(_OSXOverridePath) ? _path : _OSXOverridePath;
 #else
-			var path = _path;
+			return _path;
 #endif
+		}
 
-			if (LoadText.TryLoadText(_pathSystem, Path.Combine(path, _fileName), _extension, out string json))
+		#endregion
+
+		#region LoadData
+
+		public override void LoadData()
+		{
+			var path = GetPath();
+
+			if (TextFile.TryLoadText(_pathSystem, Path.Combine(path, _fileName), EXTENSION, out string json))
 			{
-				JsonUtility.FromJsonOverwrite(json, loadedData);
+				JsonUtility.FromJsonOverwrite(json, data);
 			}
 			else
 			{
@@ -65,5 +77,25 @@ namespace ScriptableJson
 				}
 			}
 		}
+
+		#endregion
+
+		#region SaveData
+
+		public void SaveData()
+		{
+			if (_pathSystem == PathSystem.Resources)
+			{
+				Debug.LogError("Can not write in Resources's folder");
+				return;
+			}
+
+			var json = JsonUtility.ToJson(data, prettyPrint);
+
+			TextFile.TrySaveText(_pathSystem, Path.Combine(GetPath(), _fileName), EXTENSION, json);
+		}
+
+		#endregion
+
 	}
 }

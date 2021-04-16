@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace ScriptableJson
 {
-	public abstract class ScriptableJsonGeneric<T> : ScriptableJson where T : class, new()
+	public abstract class ScriptableJsonGeneric<T> : ScriptableObject where T : class, new()
 	{
 
 		#region Variables
@@ -16,59 +16,64 @@ namespace ScriptableJson
 		[SerializeField]
 		private bool _useFile = true;
 
+#if UNITY_EDITOR
+		[SerializeField]
+		private bool _useFileInEditor = true;
+#endif
+
 		[SerializeField]
 		protected T defaultData;
 
 		[NonSerialized]
-		protected T loadedData;
+		public T data;
+
+		#endregion
+
+		#region OnEnable
+
+		private void OnEnable()
+		{
+			if (data == null)
+			{
+				SetDataToDefault();
+
+#if UNITY_EDITOR
+				if (_useFileInEditor)
+				{
+					LoadData();
+
+					if (_useFile)
+					{
+
+					}
+				}
+#else
+				if (_useFile)
+				{
+					LoadData();
+				}
+#endif
+			}
+		}
 
 		#endregion
 
 		#region Set
 
-		public void SetData(T data)
-		{
-			loadedData = data;
-		}
-
 		public void SetDataToDefault()
 		{
 #if UNITY_EDITOR
-			loadedData = DeepCopy(defaultData);
+			data = DeepCopy(defaultData);
 #else
-			loadedData = defaultData;
+			data = defaultData;
 #endif
-		}
-
-		#endregion
-
-		#region Get
-
-		public override object GetDataGeneric()
-		{
-			return GetData();
-		}
-
-		public T GetData()
-		{
-			if (loadedData == null)
-			{
-				SetDataToDefault();
-
-				if (_useFile)
-				{
-					LoadData();
-				}
-			}
-
-			return loadedData;
 		}
 
 		#endregion
 
 		#region Load
 
-		protected abstract void LoadData();
+		public abstract void LoadData();
 
 		#endregion
 
@@ -80,6 +85,7 @@ namespace ScriptableJson
 			using (var ms = new MemoryStream())
 			{
 				var formatter = new BinaryFormatter();
+
 				formatter.Serialize(ms, other);
 				ms.Position = 0;
 
