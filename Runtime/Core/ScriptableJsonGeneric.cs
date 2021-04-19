@@ -1,58 +1,54 @@
-﻿#if UNITY_EDITOR
-using System.IO;
+﻿using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
-#endif
-
 using System;
 using UnityEngine;
 
 namespace ScriptableJson
 {
-	public abstract class ScriptableJsonGeneric<T> : ScriptableObject where T : class, new()
+	public abstract class ScriptableJsonGeneric<T> : ScriptableObject
 	{
 
 		#region Variables
 
-		[SerializeField]
-		private bool _useFile = true;
+		public bool useFile = true;
 
-#if UNITY_EDITOR
-		[SerializeField]
-		private bool _useFileInEditor = true;
-#endif
+		public bool useFileInEditor = true;
 
 		[SerializeField]
-		protected T defaultData;
+		protected T defaultData = default;
 
 		[NonSerialized]
-		public T data;
+		protected T _data = default;
 
-		#endregion
-
-		#region OnEnable
-
-		private void OnEnable()
+		public T Data
 		{
-			if (data == null)
+			get
 			{
-				SetDataToDefault();
-
-#if UNITY_EDITOR
-				if (_useFileInEditor)
+				if (_data == null)
 				{
-					LoadData();
-
-					if (_useFile)
+					SetDataToDefault();
+#if UNITY_EDITOR
+					if (useFileInEditor)
 					{
+						LoadData();
 
+						if (useFile)
+						{ }
 					}
-				}
 #else
-				if (_useFile)
+				if (useFile)
 				{
 					LoadData();
 				}
 #endif
+				}
+
+				return _data;
+			}
+
+			set
+			{
+				_data = value;
 			}
 		}
 
@@ -62,11 +58,14 @@ namespace ScriptableJson
 
 		public void SetDataToDefault()
 		{
-#if UNITY_EDITOR
-			data = DeepCopy(defaultData);
-#else
-			data = defaultData;
-#endif
+			if (typeof(T).IsClass)
+			{
+				_data = DeepCopy(defaultData);
+			}
+			else
+			{
+				_data = defaultData;
+			}
 		}
 
 		#endregion
@@ -77,10 +76,9 @@ namespace ScriptableJson
 
 		#endregion
 
-		#region Debug
+		#region DeepCopy
 
-#if UNITY_EDITOR
-		protected static U DeepCopy<U>(U other)
+		protected static T DeepCopy(T other)
 		{
 			using (var ms = new MemoryStream())
 			{
@@ -89,10 +87,9 @@ namespace ScriptableJson
 				formatter.Serialize(ms, other);
 				ms.Position = 0;
 
-				return (U)formatter.Deserialize(ms);
+				return (T)formatter.Deserialize(ms);
 			}
 		}
-#endif
 
 		#endregion
 

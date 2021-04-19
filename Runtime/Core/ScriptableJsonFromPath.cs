@@ -57,23 +57,26 @@ namespace ScriptableJson
 
 			if (TextFile.TryLoadText(_pathSystem, Path.Combine(path, _fileName), EXTENSION, out string json))
 			{
-				JsonUtility.FromJsonOverwrite(json, data);
+				JsonUtility.FromJsonOverwrite(json, Data);
 			}
 			else
 			{
-				string getDebugText() => $"File: {_fileName} not found at path: {path}";
-
-				switch (_throwDebugIfNotFind)
+				if (_throwDebugIfNotFind != DebugLevel.None)
 				{
-					case DebugLevel.Normal:
-						Debug.Log(getDebugText(), this);
-						break;
-					case DebugLevel.Warning:
-						Debug.LogWarning(getDebugText(), this);
-						break;
-					case DebugLevel.Error:
-						Debug.LogError(getDebugText(), this);
-						break;
+					string getDebugText() => $"File: {_fileName} not found at path: {path}";
+
+					switch (_throwDebugIfNotFind)
+					{
+						case DebugLevel.Normal:
+							Debug.Log(getDebugText(), this);
+							break;
+						case DebugLevel.Warning:
+							Debug.LogWarning(getDebugText(), this);
+							break;
+						case DebugLevel.Error:
+							Debug.LogError(getDebugText(), this);
+							break;
+					}
 				}
 			}
 		}
@@ -86,11 +89,11 @@ namespace ScriptableJson
 		{
 			if (_pathSystem == PathSystem.Resources)
 			{
-				Debug.LogError("Can not write in Resources's folder");
+				Debug.LogError("Can't write in Resources's folder");
 				return;
 			}
 
-			var json = JsonUtility.ToJson(data, prettyPrint);
+			var json = JsonUtility.ToJson(Data, prettyPrint);
 
 			TextFile.TrySaveText(_pathSystem, Path.Combine(GetPath(), _fileName), EXTENSION, json);
 		}
