@@ -1,11 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using UnityEngine;
-using System;
 
 namespace ScriptableJson
 {
 	public static class TextFile
-	{	
+	{
 		public static bool TryLoadText(PathSystem pathSystem, string path, string extension, out string text)
 		{
 			switch (pathSystem)
@@ -42,7 +42,7 @@ namespace ScriptableJson
 		{
 			if (File.Exists(path))
 			{
-				using (StreamReader streamReader = File.OpenText(path))
+				using (var streamReader = File.OpenText(path))
 				{
 					text = streamReader.ReadToEnd();
 
@@ -82,7 +82,7 @@ namespace ScriptableJson
 
 		public static bool TryLoadTextFromRessource(string path, out string text)
 		{
-			TextAsset textAsset = Resources.Load<TextAsset>(path);
+			var textAsset = Resources.Load<TextAsset>(path);
 
 			if (textAsset != null)
 			{

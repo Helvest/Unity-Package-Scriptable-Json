@@ -53,7 +53,7 @@ namespace ScriptableJson
 
 		public override void LoadData()
 		{
-			var path = GetPath();
+			string path = GetPath();
 
 			if (TextFile.TryLoadText(_pathSystem, Path.Combine(path, _fileName), EXTENSION, out string json))
 			{
@@ -93,7 +93,7 @@ namespace ScriptableJson
 				return;
 			}
 
-			var json = JsonUtility.ToJson(Data, prettyPrint);
+			string json = JsonUtility.ToJson(Data, prettyPrint);
 
 			TextFile.TrySaveText(_pathSystem, Path.Combine(GetPath(), _fileName), EXTENSION, json);
 		}
