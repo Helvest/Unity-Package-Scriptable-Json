@@ -46,10 +46,7 @@ namespace ScriptableJson
 				return _data;
 			}
 
-			set
-			{
-				_data = value;
-			}
+			set => _data = value;
 		}
 
 		#endregion

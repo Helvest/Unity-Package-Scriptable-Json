@@ -6,39 +6,25 @@ namespace ScriptableJson
 {
 	public static class TextFile
 	{
-		public static bool TryLoadText(PathSystem pathSystem, string path, string extension, out string text)
+		public static bool TryLoadText(PathSystem pathSystem, string path, out string text)
 		{
-			switch (pathSystem)
+			return pathSystem switch
 			{
-				default:
-				case PathSystem.DirectPath:
-					return TryLoadTextFromPatch(path + extension, out text);
-
-				case PathSystem.StreamingAssets:
-					return TryLoadTextFromStreamingAssets(path + extension, out text);
-
-				case PathSystem.Resources:
-					return TryLoadTextFromRessource(path, out text);
-			}
+				PathSystem.Resources => TryLoadTextFromRessource(path, out text),
+				_ => TryLoadTextFromPath(path, out text),
+			};
 		}
 
-		public static bool TrySaveText(PathSystem pathSystem, string path, string extension, string text)
+		public static bool TrySaveText(PathSystem pathSystem, string path, string text)
 		{
-			switch (pathSystem)
+			return pathSystem switch
 			{
-				default:
-				case PathSystem.DirectPath:
-					return TrySaveTextToPatch(path + extension, text);
-
-				case PathSystem.StreamingAssets:
-					return TrySaveTextToStreamingAssets(path + extension, text);
-
-				case PathSystem.Resources:
-					return false;
-			}
+				PathSystem.Resources => false,
+				_ => TrySaveTextToPath(path, text),
+			};
 		}
 
-		public static bool TryLoadTextFromPatch(string path, out string text)
+		public static bool TryLoadTextFromPath(string path, out string text)
 		{
 			if (File.Exists(path))
 			{
@@ -55,7 +41,7 @@ namespace ScriptableJson
 			return false;
 		}
 
-		public static bool TrySaveTextToPatch(string path, string text)
+		public static bool TrySaveTextToPath(string path, string text)
 		{
 			try
 			{
@@ -68,16 +54,6 @@ namespace ScriptableJson
 			}
 
 			return true;
-		}
-
-		public static bool TryLoadTextFromStreamingAssets(string path, out string text)
-		{
-			return TryLoadTextFromPatch(Path.Combine(Application.streamingAssetsPath, path), out text);
-		}
-
-		public static bool TrySaveTextToStreamingAssets(string path, string text)
-		{
-			return TrySaveTextToPatch(Path.Combine(Application.streamingAssetsPath, path), text);
 		}
 
 		public static bool TryLoadTextFromRessource(string path, out string text)
