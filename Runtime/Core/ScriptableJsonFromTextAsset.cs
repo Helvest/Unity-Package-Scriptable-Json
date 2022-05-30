@@ -5,7 +5,7 @@ namespace ScriptableJson
 	public abstract class ScriptableJsonFromTextAsset<T> : ScriptableJsonGeneric<T>
 	{
 
-		#region Variables
+		#region Fields
 
 		[SerializeField]
 		private TextAsset _textAsset = default;

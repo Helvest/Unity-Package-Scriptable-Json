@@ -8,7 +8,7 @@ namespace ScriptableJson
 	public abstract class ScriptableJsonGeneric<T> : ScriptableObject
 	{
 
-		#region Variables
+		#region Fields
 
 		public bool useFile = true;
 

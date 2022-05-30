@@ -5,7 +5,7 @@ namespace ScriptableJson
 	public abstract class ScriptableJsonFromPath<T> : ScriptableJsonGeneric<T> where T : class, new()
 	{
 
-		#region Variables
+		#region Fields
 
 		public PathData pathData = new PathData()
 		{
