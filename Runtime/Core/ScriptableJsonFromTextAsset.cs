@@ -7,19 +7,23 @@ namespace ScriptableJson
 
 		#region Fields
 
+		[Space]
 		[SerializeField]
 		private TextAsset _textAsset = default;
 
-		[SerializeField]
-		private DebugLevel _throwDebugIfNotFind = DebugLevel.Warning;
+		[Space]
+		public DebugLevel throwDebugLogIfNotFind = DebugLevel.Warning;
 
 		#endregion
 
 		#region LoadData
 
+		/// <summary>
+		/// Load the json data from the text file
+		/// </summary>
 		public override void LoadData()
 		{
-			if (_textAsset)
+			if (_textAsset != null)
 			{
 				JsonUtility.FromJsonOverwrite(_textAsset.text, Data);
 			}
@@ -27,7 +31,7 @@ namespace ScriptableJson
 			{
 				const string DEBUG_TEXT = "TextAsset is null";
 
-				switch (_throwDebugIfNotFind)
+				switch (throwDebugLogIfNotFind)
 				{
 					case DebugLevel.Normal:
 						Debug.Log(DEBUG_TEXT, this);

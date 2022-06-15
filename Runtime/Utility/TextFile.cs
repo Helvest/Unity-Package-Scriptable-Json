@@ -11,7 +11,7 @@ namespace ScriptableJson
 			return pathSystem switch
 			{
 				PathSystem.Resources => TryLoadTextFromRessource(path, out text),
-				_ => TryLoadTextFromPath(path, out text),
+				_ => TryLoadTextFromPath(path, out text)
 			};
 		}
 
@@ -20,7 +20,7 @@ namespace ScriptableJson
 			return pathSystem switch
 			{
 				PathSystem.Resources => false,
-				_ => TrySaveTextToPath(path, text),
+				_ => TrySaveTextToPath(path, text)
 			};
 		}
 

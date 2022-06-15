@@ -14,54 +14,71 @@ namespace ScriptableJson
 
 		public bool useFileInEditor = true;
 
+		[Space]
 		[SerializeField]
 		protected T defaultData = default;
 
 		[NonSerialized]
-		protected T _data = default;
+		protected T data = default;
 
+		/// <summary>
+		/// Cached data
+		/// </summary>
 		public T Data
 		{
 			get
 			{
-				if (_data == null)
+				if (data == null)
 				{
-					SetDataToDefault();
-#if UNITY_EDITOR
-					if (useFileInEditor)
-					{
-						LoadData();
-
-						if (useFile)
-						{ }
-					}
-#else
-				if (useFile)
-				{
-					LoadData();
-				}
-#endif
+					Initialise();
 				}
 
-				return _data;
+				return data;
 			}
 
-			set => _data = value;
+			set => data = value;
+		}
+
+		#endregion
+
+		#region Initialise
+
+		/// <summary>
+		/// Set data to default and than try to load data from file
+		/// </summary>
+		public void Initialise()
+		{
+			SetDataToDefault();
+
+#if UNITY_EDITOR
+			if (useFileInEditor)
+			{
+				LoadData();
+			}
+#else
+			if (useFile)
+			{
+				LoadData();
+			}
+#endif
 		}
 
 		#endregion
 
 		#region Set
 
+		/// <summary>
+		/// Copy default data in data
+		/// </summary>
 		public void SetDataToDefault()
 		{
-			if (typeof(T).IsClass)
+			if (typeof(T).IsValueType)
 			{
-				_data = DeepCopy(defaultData);
+				data = defaultData;
 			}
 			else
 			{
-				_data = defaultData;
+				data = DeepCopy(defaultData);
 			}
 		}
 
@@ -86,6 +103,34 @@ namespace ScriptableJson
 
 				return (T)formatter.Deserialize(ms);
 			}
+		}
+
+		#endregion
+
+		#region ToString
+
+		public override string ToString()
+		{
+			return DataToString();
+		}
+
+		public string DataToString(bool prettyPrint = true)
+		{
+			return JsonUtility.ToJson(Data, prettyPrint);
+		}
+
+		public string DefaultDataToString(bool prettyPrint = true)
+		{
+			return JsonUtility.ToJson(defaultData, prettyPrint);
+		}
+
+		#endregion
+
+		#region GetHashCode
+
+		public override int GetHashCode()
+		{
+			return Data.GetHashCode();
 		}
 
 		#endregion

@@ -2,26 +2,28 @@
 
 namespace ScriptableJson
 {
-	public abstract class ScriptableJsonFromPath<T> : ScriptableJsonGeneric<T> where T : class, new()
+	public abstract class ScriptableJsonFromPath<T> : ScriptableJsonGeneric<T>
 	{
 
 		#region Fields
 
+		[Space]
 		public PathData pathData = new PathData()
 		{
 			pathSystem = PathSystem.DirectPath,
 			extension = ".json"
 		};
 
-		[Tooltip("If true, format the json for readability. If false, format the json for minimum size.")]
-		public bool prettyPrint = false;
-
-		public DebugLevel throwDebugIfNotFind = DebugLevel.Warning;
+		[Space]
+		public DebugLevel throwDebugLogIfNotFind = DebugLevel.Warning;
 
 		#endregion
 
 		#region LoadData
 
+		/// <summary>
+		/// Load the json data from the path define in pathData
+		/// </summary>
 		public override void LoadData()
 		{
 			string path = pathData.GetFullPath();
@@ -32,11 +34,11 @@ namespace ScriptableJson
 			}
 			else
 			{
-				if (throwDebugIfNotFind != DebugLevel.None)
+				if (throwDebugLogIfNotFind != DebugLevel.None)
 				{
 					string getDebugText() => $"File: {pathData.fileName} not found at path: {path}";
 
-					switch (throwDebugIfNotFind)
+					switch (throwDebugLogIfNotFind)
 					{
 						default:
 						case DebugLevel.None:
@@ -59,7 +61,11 @@ namespace ScriptableJson
 
 		#region SaveData
 
-		public void SaveData()
+		/// <summary>
+		/// Save the data to json file
+		/// </summary>
+		/// <param name="prettyPrint">If true, format the json for readability. If false, format the json for minimum size</param>
+		public void SaveData(bool prettyPrint = true)
 		{
 			if (pathData.pathSystem == PathSystem.Resources)
 			{
@@ -70,10 +76,18 @@ namespace ScriptableJson
 			string json = JsonUtility.ToJson(Data, prettyPrint);
 
 			TextFile.TrySaveText(pathData.pathSystem, pathData.GetFullPath(), json);
-
-
-			#endregion
-
 		}
+
+		#endregion
+
+		#region ToString
+
+		public string PathToString()
+		{
+			return pathData.GetFullPath();
+		}
+
+		#endregion
+
 	}
 }
