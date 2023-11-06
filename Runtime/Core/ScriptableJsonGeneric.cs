@@ -70,7 +70,6 @@ namespace ScriptableJson
 			set
 			{
 #if UNITY_EDITOR
-				Debug.Log("Set Data: " + _needReset);
 				_needReset = false;
 #endif
 				data = value;
