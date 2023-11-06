@@ -1,7 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace ScriptableJson
 {
@@ -10,15 +12,40 @@ namespace ScriptableJson
 
 		#region Fields
 
-		public bool useFile = true;
+		[FormerlySerializedAs("useFile")]
+		public bool useFileInBuild = true;
 
-		public bool useFileInEditor = true;
+		public bool useFileInDebug = true;
+
+		public bool useFileInEditor = false;
+
+		protected bool UseFile
+		{
+			get
+			{
+				if (Application.isEditor)
+				{
+					return useFileInEditor;
+				}
+
+				if (Debug.isDebugBuild)
+				{
+					return useFileInDebug;
+				}
+
+				return useFileInBuild;
+			}
+		}
 
 		[Space]
 		[SerializeField]
 		protected T defaultData = default;
 
+#if UNITY_EDITOR
+		[SerializeField]
+#else
 		[NonSerialized]
+#endif
 		protected T data = default;
 
 		/// <summary>
@@ -28,7 +55,11 @@ namespace ScriptableJson
 		{
 			get
 			{
+#if UNITY_EDITOR
+				if (data == null || _needReset)
+#else
 				if (data == null)
+#endif
 				{
 					Initialise();
 				}
@@ -36,12 +67,24 @@ namespace ScriptableJson
 				return data;
 			}
 
-			set => data = value;
+			set
+			{
+#if UNITY_EDITOR
+				Debug.Log("Set Data: " + _needReset);
+				_needReset = false;
+#endif
+				data = value;
+			}
 		}
 
-		#endregion
+#if UNITY_EDITOR
+		private bool _isSubscribed = false;
+		private bool _needReset = false;
+#endif
 
-		#region Initialise
+#endregion
+
+		#region Init
 
 		/// <summary>
 		/// Set data to default and than try to load data from file
@@ -50,15 +93,30 @@ namespace ScriptableJson
 		{
 			SetDataToDefault();
 
-#if UNITY_EDITOR
-			if (useFileInEditor)
+			if (UseFile)
 			{
 				LoadData();
 			}
-#else
-			if (useFile)
+		}
+
+		protected virtual void OnEnable()
+		{
+#if UNITY_EDITOR
+			if (!_isSubscribed)
 			{
-				LoadData();
+				EditorApplication.playModeStateChanged += OnPlayModeStateChanged;
+				_isSubscribed = true;
+			}
+#endif
+		}
+
+		protected virtual void OnDisable()
+		{
+#if UNITY_EDITOR
+			if (_isSubscribed)
+			{
+				EditorApplication.playModeStateChanged -= OnPlayModeStateChanged;
+				_isSubscribed = false;
 			}
 #endif
 		}
@@ -74,11 +132,11 @@ namespace ScriptableJson
 		{
 			if (typeof(T).IsValueType)
 			{
-				data = defaultData;
+				Data = defaultData;
 			}
 			else
 			{
-				data = DeepCopy(defaultData);
+				Data = DeepCopy(defaultData);
 			}
 		}
 
@@ -126,12 +184,17 @@ namespace ScriptableJson
 
 		#endregion
 
-		#region GetHashCode
+		#region OnPlayModeStateChanged
 
-		public override int GetHashCode()
+#if UNITY_EDITOR
+		protected virtual void OnPlayModeStateChanged(PlayModeStateChange state)
 		{
-			return Data.GetHashCode();
+			if (state == PlayModeStateChange.ExitingPlayMode)
+			{
+				_needReset = true;
+			}
 		}
+#endif
 
 		#endregion
 

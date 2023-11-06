@@ -45,11 +45,17 @@ namespace ScriptableJson
 		{
 			try
 			{
+				string directory = Path.GetDirectoryName(path);
+				if (!Directory.Exists(directory))
+				{
+					Directory.CreateDirectory(directory);
+				}
+
 				File.WriteAllText(path, text);
 			}
 			catch (Exception e)
 			{
-				Debug.LogError(e);
+				Debug.LogException(e);
 				return false;
 			}
 
