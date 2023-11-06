@@ -9,17 +9,20 @@ namespace ScriptableJson
 
 	public enum PathSystem
 	{
-		DirectPath,
+		None,
 		GameData,
 		StreamingAssets,
 		PersistentData,
 		TemporaryCache,
 		Resources,
 		ConsoleLog,
-		AbsoluteURL
+		AbsoluteURL,
+		CustomPathSystem
 	}
 
 	#endregion
+
+	#region PathData
 
 	[Serializable]
 	public class PathData
@@ -27,144 +30,228 @@ namespace ScriptableJson
 
 		#region Fields
 
-		public PathSystem pathSystem = default;
+		[field: SerializeField]
+		public virtual PathSystem PathSystem { get; set; } = PathSystem.StreamingAssets;
 
-		public string prefixPath = default;
+		[field: SerializeField]
+		public virtual string CustomPathSystem { get; set; } = string.Empty;
 
-		public string path = default;
+		[field: SerializeField]
+		public virtual string SubPath { get; set; } = string.Empty;
 
-		public string suffixPath = default;
+		[field: SerializeField]
+		public virtual string FileName { get; set; } = string.Empty;
 
-		public string linuxOverrideDirectPath = default;
+		[SerializeField]
+		private string _extension = string.Empty;
 
-		public string OSXOverrideDirectPath = default;
+		public virtual string Extension
+		{
+			get => _extension;
+			set
+			{
+				if (string.IsNullOrEmpty(value) || string.IsNullOrWhiteSpace(value))
+				{
+					_extension = string.Empty;
+					return;
+				}
 
-		public string fileName = default;
+				_extension = value[0] == '.' ? value : $".{value}";
+			}
+		}
 
-		public string extension = default;
+		public virtual string FileNameWithExtension { get => FileName + Extension; }
+
+		#endregion
+
+		#region Init
+
+		public PathData() { }
+
+		public PathData(string fullPath)
+		{
+			SetFromFullPath(fullPath);
+		}
+
+		public PathData(PathData pathData)
+		{
+			Copy(pathData);
+		}
+
+		#endregion
+
+		#region PathToPathSystem
+
+		private static readonly PathSystem[] _pathSystemCheckArray = new PathSystem[]
+		{
+			PathSystem.StreamingAssets,
+			PathSystem.GameData,
+			PathSystem.PersistentData,
+			PathSystem.TemporaryCache,
+			PathSystem.ConsoleLog,
+			PathSystem.AbsoluteURL,
+			PathSystem.CustomPathSystem
+		};
+
+		public PathSystem PathToPathSystem(string path)
+		{
+			foreach (var system in _pathSystemCheckArray)
+			{
+				var systemPath = GetSytemPath(system);
+
+				if (systemPath.Length != 0 && path.Contains(systemPath))
+				{
+					return system;
+				}
+			}
+
+			return PathSystem.None;
+		}
 
 		#endregion
 
 		#region Get
 
-		private string GetDirectPath()
+		public virtual string GetSytemPath()
 		{
-#if UNITY_EDITOR_LINUX || UNITY_STANDALONE_LINUX
-		return string.IsNullOrEmpty(linuxOverrideDirectPath) ? path : linuxOverrideDirectPath;
-#elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-		return string.IsNullOrEmpty(OSXOverrideDirectPath) ? path : OSXOverrideDirectPath;
-#else
-			return path;
-#endif
+			return GetSytemPath(PathSystem);
 		}
 
-		public string GetFullPath()
+		public virtual string GetSytemPath(PathSystem system)
 		{
-			return pathSystem switch
-			{
-				PathSystem.GameData => Path.Combine(Application.dataPath, prefixPath, path, suffixPath, fileName + extension),
-				PathSystem.StreamingAssets => Path.Combine(Application.streamingAssetsPath, prefixPath, path, suffixPath, fileName + extension),
-				PathSystem.PersistentData => Path.Combine(Application.persistentDataPath, prefixPath, path, suffixPath, fileName + extension),
-				PathSystem.TemporaryCache => Path.Combine(Application.temporaryCachePath, prefixPath, path, suffixPath, fileName + extension),
-				PathSystem.Resources => Path.Combine(prefixPath, path, suffixPath, fileName),
-				PathSystem.ConsoleLog => Path.Combine(Application.consoleLogPath, prefixPath, path, suffixPath, fileName + extension),
-				PathSystem.AbsoluteURL => Path.Combine(Application.absoluteURL, prefixPath, path, suffixPath, fileName + extension),
-				_ => Path.Combine(prefixPath, GetDirectPath(), suffixPath, fileName + extension)
-			};
+			return system == PathSystem.CustomPathSystem ? CustomPathSystem : GetSytemPathDefault(system);
 		}
 
-		public string GetDirectoryPath()
+		public static string GetSytemPathDefault(PathSystem system)
 		{
-			return pathSystem switch
-			{
-				PathSystem.GameData => Path.Combine(Application.dataPath, prefixPath, path, suffixPath),
-				PathSystem.StreamingAssets => Path.Combine(Application.streamingAssetsPath, prefixPath, path, suffixPath),
-				PathSystem.PersistentData => Path.Combine(Application.persistentDataPath, prefixPath, path, suffixPath),
-				PathSystem.TemporaryCache => Path.Combine(Application.temporaryCachePath, prefixPath, path, suffixPath),
-				PathSystem.Resources => Path.Combine(prefixPath, path, suffixPath),
-				PathSystem.ConsoleLog => Path.Combine(Application.consoleLogPath, prefixPath, path, suffixPath),
-				PathSystem.AbsoluteURL => Path.Combine(Application.absoluteURL, prefixPath, path, suffixPath),
-				_ => Path.Combine(prefixPath, GetDirectPath(), suffixPath)
-			};
-		}
-
-		public string GetPartialPath()
-		{
-			return pathSystem switch
-			{
-				PathSystem.GameData => Path.Combine(prefixPath, path, suffixPath, fileName + extension),
-				PathSystem.StreamingAssets => Path.Combine(prefixPath, path, suffixPath, fileName + extension),
-				PathSystem.PersistentData => Path.Combine(prefixPath, path, suffixPath, fileName + extension),
-				PathSystem.TemporaryCache => Path.Combine(prefixPath, path, suffixPath, fileName + extension),
-				PathSystem.Resources => Path.Combine(prefixPath, path, suffixPath, fileName),
-				PathSystem.ConsoleLog => Path.Combine(prefixPath, path, suffixPath, fileName + extension),
-				PathSystem.AbsoluteURL => Path.Combine(prefixPath, path, suffixPath, fileName + extension),
-				_ => Path.Combine(prefixPath, GetDirectPath(), suffixPath, fileName + extension)
-			};
-		}
-
-		public string GetPartialDirectoryPath()
-		{
-			return pathSystem switch
-			{
-				PathSystem.GameData => Path.Combine(prefixPath, path, suffixPath),
-				PathSystem.StreamingAssets => Path.Combine(prefixPath, path, suffixPath),
-				PathSystem.PersistentData => Path.Combine(prefixPath, path, suffixPath),
-				PathSystem.TemporaryCache => Path.Combine(prefixPath, path, suffixPath),
-				PathSystem.Resources => Path.Combine(prefixPath, path, suffixPath),
-				PathSystem.ConsoleLog => Path.Combine(prefixPath, path, suffixPath),
-				PathSystem.AbsoluteURL => Path.Combine(prefixPath, path, suffixPath),
-				_ => Path.Combine(prefixPath, GetDirectPath(), suffixPath)
-			};
-		}
-
-		public string GetSytemPath()
-		{
-			return pathSystem switch
+			return system switch
 			{
 				PathSystem.GameData => Application.dataPath,
 				PathSystem.StreamingAssets => Application.streamingAssetsPath,
 				PathSystem.PersistentData => Application.persistentDataPath,
 				PathSystem.TemporaryCache => Application.temporaryCachePath,
-				PathSystem.Resources => string.Empty,
 				PathSystem.ConsoleLog => Application.consoleLogPath,
 				PathSystem.AbsoluteURL => Application.absoluteURL,
 				_ => string.Empty
 			};
 		}
 
-		public string GetFileName()
+		public virtual string GetFullPath()
 		{
-			return fileName + extension;
+			return PathSystem switch
+			{
+				PathSystem.None => Path.Combine(SubPath, FileNameWithExtension),
+				PathSystem.Resources => Path.Combine(SubPath, FileName),
+				_ => Path.Combine(GetSytemPath(), SubPath, FileNameWithExtension)
+			};
 		}
 
-		public string GetFileNameWithoutExtension()
+		public virtual string GetDirectoryPath()
 		{
-			return fileName;
+			return PathSystem switch
+			{
+				PathSystem.None => SubPath,
+				PathSystem.Resources => SubPath,
+				_ => Path.Combine(GetSytemPath(), SubPath)
+			};
 		}
 
-		public string GetExtension()
+		public virtual string GetPartialPath()
 		{
-			return extension;
+			return PathSystem switch
+			{
+				PathSystem.Resources => Path.Combine(SubPath, FileName),
+				_ => Path.Combine(SubPath, FileNameWithExtension)
+			};
 		}
 
 		#endregion
 
 		#region Set
 
-		public void SetFromPartialPath(string partialPath)
+		public virtual void SetFromFullPath(params string[] fullPath)
 		{
-			path = Path.GetDirectoryName(partialPath);
+			SetFromFullPath(Path.Combine(fullPath));
+		}
 
-			fileName = Path.GetFileName(partialPath);
+		public virtual void SetFromFullPath(string fullPath)
+		{
+			PathSystem = PathToPathSystem(fullPath);
+
+			if (PathSystem != PathSystem.None)
+			{
+				var systemPath = GetSytemPath(PathSystem).Length;
+				fullPath = fullPath.Remove(0, systemPath + 1);
+			}
+
+			SetFromPartialPath(fullPath);
+		}
+
+		public virtual void SetFromPartialPath(string partialPath)
+		{
+			SubPath = Path.GetDirectoryName(partialPath);
+			FileName = Path.GetFileNameWithoutExtension(partialPath);
 
 			if (Path.HasExtension(partialPath))
 			{
-				extension = Path.GetExtension(partialPath);
+				Extension = Path.GetExtension(partialPath);
 			}
 		}
 
 		#endregion
 
+		#region Copy
+
+		public virtual void Copy(PathData pathData)
+		{
+			PathSystem = pathData.PathSystem;
+			CustomPathSystem = pathData.CustomPathSystem;
+			SubPath = pathData.SubPath;
+			FileName = pathData.FileName;
+			Extension = pathData.Extension;
+		}
+
+		#endregion
+
 	}
+
+	#endregion
+
+	#region PathDataSystemOverride
+
+	[Serializable]
+	public class PathDataSystemOverride : PathData
+	{
+
+		public string linuxOverrideDirectPath = default;
+
+		public string OSXOverrideDirectPath = default;
+
+		public override string SubPath
+		{
+			get
+			{
+#if DEVELOPMENT_BUILD_LINUX || UNITY_STANDALONE_LINUX
+				return string.IsNullOrEmpty(linuxOverrideDirectPath) ? path : linuxOverrideDirectPath;
+#elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+				return string.IsNullOrEmpty(OSXOverrideDirectPath) ? path : OSXOverrideDirectPath;
+#else
+				return base.SubPath;
+#endif
+			}
+			set
+			{
+#if DEVELOPMENT_BUILD_LINUX || UNITY_STANDALONE_LINUX
+				linuxOverrideDirectPath = value;
+#elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
+				OSXOverrideDirectPath = value;
+#else
+				base.SubPath = value;
+#endif
+			}
+		}
+	}
+
+	#endregion
+
 }

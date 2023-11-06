@@ -2,17 +2,13 @@
 
 namespace ScriptableJson
 {
-	public abstract class ScriptableJsonFromPath<T> : ScriptableJsonGeneric<T>
+	public abstract class ScriptableJsonFromPath<T, Path> : ScriptableJsonGeneric<T> where Path : PathData
 	{
 
 		#region Fields
 
-		[Space]
-		public PathData pathData = new PathData()
-		{
-			pathSystem = PathSystem.DirectPath,
-			extension = ".json"
-		};
+		[field: SerializeField]
+		public virtual Path PathData { get; set; }
 
 		[Space]
 		public DebugLevel throwDebugLogIfNotFind = DebugLevel.Warning;
@@ -26,9 +22,9 @@ namespace ScriptableJson
 		/// </summary>
 		public override void LoadData()
 		{
-			string path = pathData.GetFullPath();
+			string path = PathData.GetFullPath();
 
-			if (TextFile.TryLoadText(pathData.pathSystem, path, out string json))
+			if (TextFile.TryLoadText(PathData.PathSystem, path, out string json))
 			{
 				JsonUtility.FromJsonOverwrite(json, Data);
 			}
@@ -36,7 +32,7 @@ namespace ScriptableJson
 			{
 				if (throwDebugLogIfNotFind != DebugLevel.None)
 				{
-					string getDebugText() => $"File: {pathData.fileName} not found at path: {path}";
+					string getDebugText() => $"File: {PathData.FileName} not found at path: {path}";
 
 					switch (throwDebugLogIfNotFind)
 					{
@@ -67,7 +63,7 @@ namespace ScriptableJson
 		/// <param name="prettyPrint">If true, format the json for readability. If false, format the json for minimum size</param>
 		public void SaveData(bool prettyPrint = true)
 		{
-			if (pathData.pathSystem == PathSystem.Resources)
+			if (PathData.PathSystem == PathSystem.Resources)
 			{
 				Debug.LogError("Can't write in Resources's folder");
 				return;
@@ -75,7 +71,7 @@ namespace ScriptableJson
 
 			string json = JsonUtility.ToJson(Data, prettyPrint);
 
-			TextFile.TrySaveText(pathData.pathSystem, pathData.GetFullPath(), json);
+			TextFile.TrySaveText(PathData.PathSystem, PathData.GetFullPath(), json);
 		}
 
 		#endregion
@@ -84,10 +80,12 @@ namespace ScriptableJson
 
 		public string PathToString()
 		{
-			return pathData.GetFullPath();
+			return PathData.GetFullPath();
 		}
 
 		#endregion
 
 	}
+
+	public abstract class ScriptableJsonFromPath<T> : ScriptableJsonFromPath<T, PathData> { }
 }
