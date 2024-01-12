@@ -21,29 +21,40 @@ namespace ScriptableJson
 		/// <summary>
 		/// Load the json data from the text file
 		/// </summary>
-		public override void LoadData()
+		public override bool LoadData()
 		{
 			if (_textAsset != null)
 			{
-				JsonUtility.FromJsonOverwrite(_textAsset.text, Data);
-			}
-			else
-			{
-				const string DEBUG_TEXT = "TextAsset is null";
+				string json = _textAsset.text;
 
-				switch (throwDebugLogIfNotFind)
+				if (IsValueType)
 				{
-					case DebugLevel.Normal:
-						Debug.Log(DEBUG_TEXT, this);
-						break;
-					case DebugLevel.Warning:
-						Debug.LogWarning(DEBUG_TEXT, this);
-						break;
-					case DebugLevel.Error:
-						Debug.LogError(DEBUG_TEXT, this);
-						break;
+					Data = JsonUtility.FromJson<T>(json);
 				}
+				else
+				{
+					JsonUtility.FromJsonOverwrite(json, Data);
+				}
+
+				return true;
 			}
+
+			const string DEBUG_TEXT = "TextAsset is null";
+
+			switch (throwDebugLogIfNotFind)
+			{
+				case DebugLevel.Normal:
+					Debug.Log(DEBUG_TEXT, this);
+					break;
+				case DebugLevel.Warning:
+					Debug.LogWarning(DEBUG_TEXT, this);
+					break;
+				case DebugLevel.Error:
+					Debug.LogError(DEBUG_TEXT, this);
+					break;
+			}
+
+			return false;
 		}
 
 		#endregion

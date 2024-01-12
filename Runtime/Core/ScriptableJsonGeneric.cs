@@ -1,23 +1,25 @@
-﻿using System;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using UnityEditor;
+﻿using System.IO;
 using UnityEngine;
-using UnityEngine.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace ScriptableJson
 {
+
 	public abstract class ScriptableJsonGeneric<T> : ScriptableObject
 	{
 
 		#region Fields
 
-		[FormerlySerializedAs("useFile")]
+		protected static bool IsValueType => typeof(T).IsValueType;
+
 		public bool useFileInBuild = true;
 
 		public bool useFileInDebug = true;
 
-		public bool useFileInEditor = false;
+		public bool useFileInEditor = false;	
 
 		protected bool UseFile
 		{
@@ -56,14 +58,16 @@ namespace ScriptableJson
 			get
 			{
 #if UNITY_EDITOR
-				if (data == null || _needReset)
-#else
-				if (data == null)
-#endif
+				if (_needReset || data == null)
 				{
 					Initialise();
 				}
-
+#else
+				if (data == null)
+				{
+					Initialise();
+				}
+#endif
 				return data;
 			}
 
@@ -78,7 +82,7 @@ namespace ScriptableJson
 
 #if UNITY_EDITOR
 		private bool _isSubscribed = false;
-		private bool _needReset = false;
+		private bool _needReset = true;
 #endif
 
 #endregion
@@ -129,36 +133,28 @@ namespace ScriptableJson
 		/// </summary>
 		public void SetDataToDefault()
 		{
-			if (typeof(T).IsValueType)
-			{
-				Data = defaultData;
-			}
-			else
-			{
-				Data = DeepCopy(defaultData);
-			}
+			Data = IsValueType ? defaultData : DeepCopy(defaultData);
 		}
 
 		#endregion
 
 		#region Load
 
-		public abstract void LoadData();
+		public abstract bool LoadData();
 
 		#endregion
 
 		#region DeepCopy
 
+		private static readonly BinaryFormatter _formatter = new BinaryFormatter();
+
 		protected static T DeepCopy(T other)
 		{
 			using (var ms = new MemoryStream())
 			{
-				var formatter = new BinaryFormatter();
-
-				formatter.Serialize(ms, other);
+				_formatter.Serialize(ms, other);
 				ms.Position = 0;
-
-				return (T)formatter.Deserialize(ms);
+				return (T)_formatter.Deserialize(ms);
 			}
 		}
 
@@ -168,15 +164,15 @@ namespace ScriptableJson
 
 		public override string ToString()
 		{
-			return DataToString();
+			return DataToJson();
 		}
 
-		public string DataToString(bool prettyPrint = true)
+		public string DataToJson(bool prettyPrint = true)
 		{
 			return JsonUtility.ToJson(Data, prettyPrint);
 		}
 
-		public string DefaultDataToString(bool prettyPrint = true)
+		public string DefaultDataToJson(bool prettyPrint = true)
 		{
 			return JsonUtility.ToJson(defaultData, prettyPrint);
 		}
@@ -188,7 +184,14 @@ namespace ScriptableJson
 #if UNITY_EDITOR
 		protected virtual void OnPlayModeStateChanged(PlayModeStateChange state)
 		{
-			if (state == PlayModeStateChange.ExitingPlayMode)
+			if (state == PlayModeStateChange.EnteredPlayMode)
+			{
+				if (_needReset)
+				{
+					data = typeof(T).IsValueType ? defaultData : DeepCopy(defaultData);
+				}
+			}
+			else if (state == PlayModeStateChange.ExitingPlayMode)
 			{
 				_needReset = true;
 			}
@@ -198,4 +201,5 @@ namespace ScriptableJson
 		#endregion
 
 	}
+
 }
