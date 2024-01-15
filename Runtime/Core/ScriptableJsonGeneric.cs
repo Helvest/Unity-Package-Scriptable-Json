@@ -3,6 +3,8 @@ using UnityEngine;
 using System.Runtime.Serialization.Formatters.Binary;
 #if UNITY_EDITOR
 using UnityEditor;
+#else
+using System;
 #endif
 
 namespace ScriptableJson
