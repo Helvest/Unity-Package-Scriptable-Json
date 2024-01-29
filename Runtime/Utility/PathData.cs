@@ -7,6 +7,9 @@ namespace ScriptableJson
 
 	#region Enum
 
+	/// <summary>
+	/// Enum representing different path systems.
+	/// </summary>
 	public enum PathSystem
 	{
 		None,
@@ -30,49 +33,67 @@ namespace ScriptableJson
 
 		#region Fields
 
-		[field: SerializeField]
+		/// <summary>
+		/// The path system to use
+		/// </summary>
+		[field: SerializeField, Tooltip("The path system to use.")]
 		public virtual PathSystem PathSystem { get; set; } = PathSystem.StreamingAssets;
 
-		[field: SerializeField]
+		/// <summary>
+		/// Custom path system if PathSystem is set to CustomPathSystem
+		/// </summary>
+		[field: SerializeField, Tooltip("Custom path system if PathSystem is set to CustomPathSystem.")]
 		public virtual string CustomPathSystem { get; set; } = string.Empty;
 
-		[field: SerializeField]
+		/// <summary>
+		/// Subpath within the selected path system
+		/// </summary>
+		[field: SerializeField, Tooltip("Subpath within the selected path system.")]
 		public virtual string SubPath { get; set; } = string.Empty;
 
-		[field: SerializeField]
+		/// <summary>
+		/// File name without extension
+		/// </summary>
+		[field: SerializeField, Tooltip("File name without extension.")]
 		public virtual string FileName { get; set; } = string.Empty;
 
-		[SerializeField]
-		private string _extension = string.Empty;
+		/// <summary>
+		/// File extension, dot not required
+		/// </summary>
+		[field: SerializeField, Tooltip("File extension, dot not required.")]
+		public virtual string Extension { get; set; } = string.Empty;
 
-		public virtual string Extension
+		public virtual string FileNameWithExtension
 		{
-			get => _extension;
-			set
+			get
 			{
-				if (string.IsNullOrEmpty(value) || string.IsNullOrWhiteSpace(value))
-				{
-					_extension = string.Empty;
-					return;
-				}
-
-				_extension = value[0] == '.' ? value : $".{value}";
+				return string.IsNullOrWhiteSpace(Extension) ? 
+					FileName : Path.ChangeExtension(FileName, Extension);
 			}
 		}
-
-		public virtual string FileNameWithExtension { get => FileName + Extension; }
 
 		#endregion
 
 		#region Init
 
+		/// <summary>
+		/// Default constructor.
+		/// </summary>
 		public PathData() { }
 
+		/// <summary>
+		/// Constructor to initialize from a full path.
+		/// </summary>
+		/// <param name="fullPath">Full path to initialize from.</param>
 		public PathData(string fullPath)
 		{
 			SetFromFullPath(fullPath);
 		}
 
+		/// <summary>
+		/// Copy constructor.
+		/// </summary>
+		/// <param name="pathData">PathData instance to copy.</param>
 		public PathData(PathData pathData)
 		{
 			Copy(pathData);
@@ -82,7 +103,10 @@ namespace ScriptableJson
 
 		#region PathToPathSystem
 
-		private static readonly PathSystem[] _pathSystemCheckArray = new PathSystem[]
+		/// <summary>
+		/// Array of path systems for path conversion checks.
+		/// </summary>
+		public static readonly PathSystem[] pathSystemArray = new PathSystem[]
 		{
 			PathSystem.StreamingAssets,
 			PathSystem.GameData,
@@ -93,9 +117,14 @@ namespace ScriptableJson
 			PathSystem.CustomPathSystem
 		};
 
+		/// <summary>
+		/// Converts a full path to a PathSystem based on predefined path systems.
+		/// </summary>
+		/// <param name="path">Full path to convert.</param>
+		/// <returns>Converted PathSystem.</returns>
 		public PathSystem PathToPathSystem(string path)
 		{
-			foreach (var system in _pathSystemCheckArray)
+			foreach (var system in pathSystemArray)
 			{
 				var systemPath = GetSytemPath(system);
 
@@ -112,16 +141,30 @@ namespace ScriptableJson
 
 		#region Get
 
+		/// <summary>
+		/// Gets the system path based on the current PathSystem.
+		/// </summary>
+		/// <returns>System path.</returns>
 		public virtual string GetSytemPath()
 		{
 			return GetSytemPath(PathSystem);
 		}
 
+		/// <summary>
+		/// Gets the system path based on the provided PathSystem.
+		/// </summary>
+		/// <param name="system">PathSystem to get the path for.</param>
+		/// <returns>System path.</returns>
 		public virtual string GetSytemPath(PathSystem system)
 		{
 			return system == PathSystem.CustomPathSystem ? CustomPathSystem : GetSytemPathDefault(system);
 		}
 
+		/// <summary>
+		/// Gets the default system path for a given PathSystem.
+		/// </summary>
+		/// <param name="system">PathSystem to get the default path for.</param>
+		/// <returns>Default system path.</returns>
 		public static string GetSytemPathDefault(PathSystem system)
 		{
 			return system switch
@@ -136,6 +179,10 @@ namespace ScriptableJson
 			};
 		}
 
+		/// <summary>
+		/// Gets the full path based on the current PathSystem.
+		/// </summary>
+		/// <returns>Full path.</returns>
 		public virtual string GetFullPath()
 		{
 			return PathSystem switch
@@ -146,6 +193,10 @@ namespace ScriptableJson
 			};
 		}
 
+		/// <summary>
+		/// Gets the directory path based on the current PathSystem.
+		/// </summary>
+		/// <returns>Directory path.</returns>
 		public virtual string GetDirectoryPath()
 		{
 			return PathSystem switch
@@ -156,6 +207,10 @@ namespace ScriptableJson
 			};
 		}
 
+		/// <summary>
+		/// Gets the partial path based on the current PathSystem.
+		/// </summary>
+		/// <returns>Partial path.</returns>
 		public virtual string GetPartialPath()
 		{
 			return PathSystem switch
@@ -169,11 +224,19 @@ namespace ScriptableJson
 
 		#region Set
 
+		/// <summary>
+		/// Sets the fields based on a full path.
+		/// </summary>
+		/// <param name="fullPath">Full path to set from.</param>
 		public virtual void SetFromFullPath(params string[] fullPath)
 		{
 			SetFromFullPath(Path.Combine(fullPath));
 		}
 
+		/// <summary>
+		/// Sets the fields based on a full path.
+		/// </summary>
+		/// <param name="fullPath">Full path to set from.</param>
 		public virtual void SetFromFullPath(string fullPath)
 		{
 			PathSystem = PathToPathSystem(fullPath);
@@ -187,21 +250,25 @@ namespace ScriptableJson
 			SetFromPartialPath(fullPath);
 		}
 
+		/// <summary>
+		/// Sets the fields based on a partial path.
+		/// </summary>
+		/// <param name="partialPath">Partial path to set from.</param>
 		public virtual void SetFromPartialPath(string partialPath)
 		{
 			SubPath = Path.GetDirectoryName(partialPath);
 			FileName = Path.GetFileNameWithoutExtension(partialPath);
-
-			if (Path.HasExtension(partialPath))
-			{
-				Extension = Path.GetExtension(partialPath);
-			}
+			Extension = Path.HasExtension(partialPath) ? Path.GetExtension(partialPath) : string.Empty;
 		}
 
 		#endregion
 
 		#region Copy
 
+		/// <summary>
+		/// Copies the values from another PathData instance.
+		/// </summary>
+		/// <param name="pathData">PathData instance to copy from.</param>
 		public virtual void Copy(PathData pathData)
 		{
 			PathSystem = pathData.PathSystem;
@@ -209,6 +276,28 @@ namespace ScriptableJson
 			SubPath = pathData.SubPath;
 			FileName = pathData.FileName;
 			Extension = pathData.Extension;
+		}
+
+		#endregion
+
+		#region Exist
+
+		/// <summary>
+		/// Checks if the directory exists.
+		/// </summary>
+		/// <returns>True if the directory exists, false otherwise.</returns>
+		public bool DirectoryExist()
+		{
+			return Directory.Exists(GetDirectoryPath());
+		}
+
+		/// <summary>
+		/// Checks if the file exists.
+		/// </summary>
+		/// <returns>True if the file exists, false otherwise.</returns>
+		public bool FileExist()
+		{
+			return File.Exists(GetFullPath());
 		}
 
 		#endregion
@@ -232,9 +321,9 @@ namespace ScriptableJson
 			get
 			{
 #if DEVELOPMENT_BUILD_LINUX || UNITY_STANDALONE_LINUX
-				return string.IsNullOrEmpty(linuxOverrideDirectPath) ? path : linuxOverrideDirectPath;
+                return string.IsNullOrEmpty(linuxOverrideDirectPath) ? path : linuxOverrideDirectPath;
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-				return string.IsNullOrEmpty(OSXOverrideDirectPath) ? path : OSXOverrideDirectPath;
+                return string.IsNullOrEmpty(OSXOverrideDirectPath) ? path : OSXOverrideDirectPath;
 #else
 				return base.SubPath;
 #endif
@@ -242,9 +331,9 @@ namespace ScriptableJson
 			set
 			{
 #if DEVELOPMENT_BUILD_LINUX || UNITY_STANDALONE_LINUX
-				linuxOverrideDirectPath = value;
+                linuxOverrideDirectPath = value;
 #elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-				OSXOverrideDirectPath = value;
+                OSXOverrideDirectPath = value;
 #else
 				base.SubPath = value;
 #endif
