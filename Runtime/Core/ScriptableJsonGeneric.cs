@@ -1,6 +1,8 @@
 ﻿using System.IO;
 using UnityEngine;
 using System.Runtime.Serialization.Formatters.Binary;
+using System;
+
 #if UNITY_EDITOR
 using UnityEditor;
 #else
@@ -13,31 +15,59 @@ namespace ScriptableJson
 	public abstract class ScriptableJsonGeneric<T> : ScriptableObject
 	{
 
+		#region Enum
+
+		[Flags]
+		public enum FileUsage
+		{
+			None = 0,
+			InBuild = 1 << 0,
+			InDebug = 1 << 1,
+			InEditor = 1 << 2
+		}
+
+		#endregion
+
 		#region Fields
 
-		protected static bool IsValueType => typeof(T).IsValueType;
+		public static bool IsValueType => typeof(T).IsValueType;
 
-		public bool useFileInBuild = true;
+		public FileUsage fileUsage = FileUsage.InBuild | FileUsage.InDebug;
 
-		public bool useFileInDebug = true;
-
-		public bool useFileInEditor = false;	
-
-		protected bool UseFile
+		public bool UseFile
 		{
 			get
 			{
-				if (Application.isEditor)
+#if UNITY_EDITOR
+				return (fileUsage & FileUsage.InEditor) == FileUsage.InEditor;
+#elif DEBUG
+				return (fileUsage & FileUsage.InDebug) == FileUsage.InDebug;
+#else
+				return (fileUsage & FileUsage.InBuild) == FileUsage.InBuild;
+#endif
+			}
+			set
+			{
+				if (value)
 				{
-					return useFileInEditor;
+#if UNITY_EDITOR
+					fileUsage |= FileUsage.InEditor;
+#elif DEBUG
+					fileUsage |= FileUsage.InDebug;
+#else
+					fileUsage |= FileUsage.InBuild;
+#endif
 				}
-
-				if (Debug.isDebugBuild)
+				else
 				{
-					return useFileInDebug;
+#if UNITY_EDITOR
+					fileUsage &= ~FileUsage.InEditor;
+#elif DEBUG
+					fileUsage &= ~FileUsage.InDebug;
+#else
+					fileUsage &= ~FileUsage.InBuild;
+#endif
 				}
-
-				return useFileInBuild;
 			}
 		}
 

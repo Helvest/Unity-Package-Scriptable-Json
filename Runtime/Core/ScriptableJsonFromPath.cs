@@ -2,7 +2,20 @@
 
 namespace ScriptableJson
 {
-	public abstract class ScriptableJsonFromPath<T, Path> : ScriptableJsonGeneric<T> where Path : PathData
+
+	public interface IHavePath
+	{
+		public string PathToString();
+
+		public bool LoadData();
+
+		public bool SaveData(bool prettyPrint = true);
+
+		public void SetDataToDefault();
+	}
+
+
+	public abstract class ScriptableJsonFromPath<T, Path> : ScriptableJsonGeneric<T>, IHavePath where Path : PathData
 	{
 
 		#region Fields
@@ -36,7 +49,7 @@ namespace ScriptableJson
 				}
 				return true;
 			}
-			
+
 			if (throwDebugLogIfNotFind != DebugLevel.None)
 			{
 				string getDebugText() => $"File: {PathData.FileName} not found at path: {path}";
