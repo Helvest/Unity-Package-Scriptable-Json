@@ -1,10 +1,12 @@
 {
     "name": "Helvest.ScriptableJson.Editor",
-    "rootNamespace": "",
+    "rootNamespace": "ScriptableJson",
     "references": [
         "GUID:d369ca0e73134094abd031e845d0aae3"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
