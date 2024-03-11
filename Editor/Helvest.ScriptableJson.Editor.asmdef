@@ -1,0 +1,16 @@
+{
+    "name": "Helvest.ScriptableJson.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d369ca0e73134094abd031e845d0aae3"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
