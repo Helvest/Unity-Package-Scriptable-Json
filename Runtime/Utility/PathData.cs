@@ -28,7 +28,7 @@ namespace ScriptableJson
 	#region PathData
 
 	[Serializable]
-	public class PathData
+	public class PathData : IPath
 	{
 
 		#region Fields

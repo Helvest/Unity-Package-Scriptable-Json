@@ -15,12 +15,21 @@ namespace ScriptableJson
 	}
 
 
-	public abstract class ScriptableJsonFromPath<T, Path> : ScriptableJsonGeneric<T>, IHavePath where Path : PathData
+	public interface IPath
+	{
+		string GetFullPath();
+
+		PathSystem PathSystem { get; }
+
+		string FileName { get; }
+	}
+
+	public abstract class ScriptableJsonFromPath<T, Path> : ScriptableJsonGeneric<T>, IHavePath where Path : IPath
 	{
 
 		#region Fields
 
-		[field: SerializeField]
+		[field: SerializeField, Space]
 		public virtual Path PathData { get; set; }
 
 		[Space]
