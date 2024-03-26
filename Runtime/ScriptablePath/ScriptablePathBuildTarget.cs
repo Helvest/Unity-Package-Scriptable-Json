@@ -4,89 +4,18 @@ using UnityEngine;
 
 namespace ScriptableJson
 {
-	[CreateAssetMenu(menuName = "ScriptablePath/With Build Target")]
+	[CreateAssetMenu(menuName = "ScriptableJson/Scriptable Path Build Target")]
 	public class ScriptablePathBuildTarget : ScriptablePath
 	{
 		[Serializable]
-		public class PathDataBuild : PathData
+		public class PathDataWithBuildTarget : PathDataWithParent
 		{
-
 			public List<RuntimePlatform> buildTargets = new List<RuntimePlatform>() { RuntimePlatform.WindowsPlayer };
-
-			public ScriptablePathBuildTarget parent;
-
-			private PathData Parent => parent?.GetPathData();
-
-			public override PathSystem PathSystem
-			{
-				get
-				{
-					if (base.PathSystem == PathSystem.None && Parent != null)
-					{
-						return Parent.PathSystem;
-					}
-
-					return base.PathSystem;
-				}
-			}
-
-			public override string CustomPathSystem
-			{
-				get
-				{
-					if (string.IsNullOrWhiteSpace(base.CustomPathSystem) && Parent != null)
-					{
-						return Parent.CustomPathSystem;
-					}
-
-					return base.CustomPathSystem;
-				}
-			}
-
-			public override string SubPath
-			{
-				get
-				{
-					if (string.IsNullOrWhiteSpace(base.SubPath) && Parent != null)
-					{
-						return Parent.SubPath;
-					}
-
-					return base.SubPath;
-				}
-			}
-
-			public override string FileName
-			{
-				get
-				{
-					if (string.IsNullOrWhiteSpace(base.FileName) && Parent != null)
-					{
-						return Parent.FileName;
-					}
-
-					return base.FileName;
-				}
-			}
-
-			public override string Extension
-			{
-				get
-				{
-					if (string.IsNullOrWhiteSpace(base.Extension) && Parent != null)
-					{
-						return Parent.Extension;
-					}
-
-					return base.Extension;
-				}
-			}
-
 		}
 
-		public List<PathDataBuild> pathDataBuilds = new List<PathDataBuild>()
+		public List<PathDataWithBuildTarget> pathDataBuilds = new List<PathDataWithBuildTarget>()
 		{
-			new PathDataBuild()
+			new PathDataWithBuildTarget()
 		};
 
 		public override PathSystem PathSystem => GetPathData().PathSystem;

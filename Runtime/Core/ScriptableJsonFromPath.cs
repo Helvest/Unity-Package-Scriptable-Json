@@ -14,7 +14,6 @@ namespace ScriptableJson
 		public void SetDataToDefault();
 	}
 
-
 	public interface IPath
 	{
 		string GetFullPath();
@@ -65,9 +64,6 @@ namespace ScriptableJson
 
 				switch (throwDebugLogIfNotFind)
 				{
-					default:
-					case DebugLevel.None:
-						break;
 					case DebugLevel.Normal:
 						Debug.Log(getDebugText(), this);
 						break;

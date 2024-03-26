@@ -67,7 +67,7 @@ namespace ScriptableJson
 		{
 			get
 			{
-				return string.IsNullOrWhiteSpace(Extension) ? 
+				return string.IsNullOrWhiteSpace(Extension) ?
 					FileName : Path.ChangeExtension(FileName, Extension);
 			}
 		}
@@ -302,43 +302,6 @@ namespace ScriptableJson
 
 		#endregion
 
-	}
-
-	#endregion
-
-	#region PathDataSystemOverride
-
-	[Serializable]
-	public class PathDataSystemOverride : PathData
-	{
-
-		public string linuxOverrideDirectPath = default;
-
-		public string OSXOverrideDirectPath = default;
-
-		public override string SubPath
-		{
-			get
-			{
-#if DEVELOPMENT_BUILD_LINUX || UNITY_STANDALONE_LINUX
-                return string.IsNullOrEmpty(linuxOverrideDirectPath) ? path : linuxOverrideDirectPath;
-#elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-                return string.IsNullOrEmpty(OSXOverrideDirectPath) ? path : OSXOverrideDirectPath;
-#else
-				return base.SubPath;
-#endif
-			}
-			set
-			{
-#if DEVELOPMENT_BUILD_LINUX || UNITY_STANDALONE_LINUX
-                linuxOverrideDirectPath = value;
-#elif UNITY_EDITOR_OSX || UNITY_STANDALONE_OSX
-                OSXOverrideDirectPath = value;
-#else
-				base.SubPath = value;
-#endif
-			}
-		}
 	}
 
 	#endregion

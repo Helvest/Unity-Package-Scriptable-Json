@@ -11,7 +11,7 @@ namespace ScriptableJson
 
 		public override void OnInspectorGUI()
 		{
-			IHavePath scriptableJson = (IHavePath)target;
+			var scriptableJson = (IHavePath)target;
 
 			GUILayout.BeginHorizontal();
 			{
