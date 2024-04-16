@@ -1,4 +1,6 @@
-﻿namespace ScriptableJson
+﻿using EasyPath;
+
+namespace ScriptableJson
 {
 	public abstract class ScriptableJsonFromPathDataWithParent<T> : ScriptableJsonFromPath<T, PathDataWithParent> { }
 }

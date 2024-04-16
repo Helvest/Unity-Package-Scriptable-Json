@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using EasyPath;
 
 namespace ScriptableJson
 {
@@ -12,15 +13,6 @@ namespace ScriptableJson
 		public bool SaveData(bool prettyPrint = true);
 
 		public void SetDataToDefault();
-	}
-
-	public interface IPath
-	{
-		string GetFullPath();
-
-		PathSystem PathSystem { get; }
-
-		string FileName { get; }
 	}
 
 	public abstract class ScriptableJsonFromPath<T, Path> : ScriptableJsonGeneric<T>, IHavePath where Path : IPath

@@ -1,7 +1,9 @@
 {
     "name": "Helvest.ScripableJson",
     "rootNamespace": "ScriptableJson",
-    "references": [],
+    "references": [
+        "GUID:d7bdac9d9c8a1b24ebcf79fdbdcc236e"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
