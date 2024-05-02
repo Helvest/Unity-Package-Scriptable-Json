@@ -1,6 +1,6 @@
 {
   "name": "com.helvest.scriptablejson",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "displayName": "Scriptable Json",
   "description": "ScriptableObject that serves as a link to Json files",
   "dependencies": {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.IO;
-using UnityEngine;
 using EasyPath;
+using UnityEngine;
 
 namespace ScriptableJson
 {
@@ -11,6 +11,7 @@ namespace ScriptableJson
 		{
 			return pathSystem switch
 			{
+				PathSystem.None => TryLoadTextFromNone(out text),
 				PathSystem.Resources => TryLoadTextFromRessource(path, out text),
 				_ => TryLoadTextFromPath(path, out text)
 			};
@@ -20,6 +21,7 @@ namespace ScriptableJson
 		{
 			return pathSystem switch
 			{
+				PathSystem.None => false,
 				PathSystem.Resources => false,
 				_ => TrySaveTextToPath(path, text)
 			};
@@ -63,6 +65,12 @@ namespace ScriptableJson
 			return true;
 		}
 
+		public static bool TryLoadTextFromNone(out string text)
+		{
+			text = null;
+			return false;
+		}
+
 		public static bool TryLoadTextFromRessource(string path, out string text)
 		{
 			var textAsset = Resources.Load<TextAsset>(path);
@@ -82,5 +90,6 @@ namespace ScriptableJson
 
 			return false;
 		}
+
 	}
 }

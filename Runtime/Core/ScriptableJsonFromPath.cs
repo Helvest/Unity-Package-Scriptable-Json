@@ -1,5 +1,5 @@
-﻿using UnityEngine;
-using EasyPath;
+﻿using EasyPath;
+using UnityEngine;
 
 namespace ScriptableJson
 {
@@ -37,6 +37,11 @@ namespace ScriptableJson
 		{
 			string path = PathData.GetFullPath();
 
+			if (PathData.PathSystem == PathSystem.None)
+			{
+				return true;
+			}
+
 			if (TextFile.TryLoadText(PathData.PathSystem, path, out string json))
 			{
 				if (IsValueType)
@@ -47,6 +52,7 @@ namespace ScriptableJson
 				{
 					JsonUtility.FromJsonOverwrite(json, Data);
 				}
+
 				return true;
 			}
 
@@ -81,6 +87,11 @@ namespace ScriptableJson
 		/// <param name="prettyPrint">If true, format the json for readability. If false, format the json for minimum size</param>
 		public bool SaveData(bool prettyPrint = true)
 		{
+			if (PathData.PathSystem == PathSystem.None)
+			{
+				return true;
+			}
+
 			if (PathData.PathSystem == PathSystem.Resources)
 			{
 				Debug.LogError("Can't write in Resources's folder");
