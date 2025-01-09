@@ -9,7 +9,7 @@ namespace ScriptableJson
 
 		[Space]
 		[SerializeField]
-		private TextAsset _textAsset = default;
+		private TextAsset _textAsset;
 
 		[Space]
 		public DebugLevel throwDebugLogIfNotFind = DebugLevel.Warning;

@@ -70,14 +70,14 @@ namespace ScriptableJson
 
 		[Space]
 		[SerializeField]
-		protected T defaultData = default;
+		protected T defaultData;
 
 #if UNITY_EDITOR
 		[SerializeField]
 #else
 		[NonSerialized]
 #endif
-		protected T data = default;
+		protected T data;
 
 		/// <summary>
 		/// Cached data
@@ -110,7 +110,7 @@ namespace ScriptableJson
 		}
 
 #if UNITY_EDITOR
-		private bool _isSubscribed = false;
+		private bool _isSubscribed;
 		private bool _needReset = true;
 #endif
 
